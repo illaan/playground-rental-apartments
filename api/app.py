@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from faker import Faker
 import random
@@ -21,7 +21,7 @@ def generate_apartment_description(apartment):
 
 for i in range(50):
     apartment = {
-        "title": fake.sentence(),
+        "title": f"{random.choice(['Villa ', 'Apartment '])}{fake.name()}",
         "location": fake.city(),
         "price": fake.random_int(min=600, max=2500),
         "guests": random.randint(1, 5),
@@ -45,6 +45,28 @@ for i in range(50):
 @app.route('/apartments', methods=['GET'])
 def get_apartments():
     return jsonify(apartments)
+
+@app.route('/apartments', methods=['POST'])
+def add_apartment():
+    new_apartment_data = request.json
+
+    # Perform validation of new apartment data here if needed
+
+    new_apartment = {
+ 
+        "title": new_apartment_data.get("title", ""),
+        "location": new_apartment_data.get("location", ""),
+        "price": new_apartment_data.get("price", ""),
+        "guests": new_apartment_data.get("guests", ""),
+        "description": new_apartment_data.get("description", ""),
+
+        "reservations": []
+    }
+
+    apartments.append(new_apartment)
+
+    return jsonify(apartments)
+
 
 
 if __name__ == '__main__':

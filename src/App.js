@@ -2,10 +2,12 @@ import "./styles/App.css";
 import { useState, useEffect } from "react";
 import SideBar from "./components/SideBar.jsx";
 import Header from "./components/Header.jsx";
-import Apartment from "./components/Apartment.jsx";
 import Modal from "./components/Modal.jsx";
+import AddApartmentForm from "./components/AddApartmentForm.jsx";
+import ApartmentList from "./components/ApartmentList.jsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import { faAngleLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
 function App() {
 	const [apartments, setApartments] = useState([]);
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,6 +48,28 @@ function App() {
 		}
 	};
 
+	const addApartment = async (newApartment) => {
+		try {
+			const response = await fetch("http://127.0.0.1:5000/apartments", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(newApartment),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to add apartment");
+			}
+
+			const updatedApartments = await response.json();
+			setApartments(updatedApartments);
+			setFilteredApartments(updatedApartments);
+		} catch (error) {
+			console.error("Error adding apartment:", error);
+		}
+	};
+
 	const filterApartments = () => {
 		const filtered = apartments.filter((apartment) => {
 			const isAvailable = apartment.reservations.every((reservation) => {
@@ -68,11 +92,10 @@ function App() {
 		});
 		setFilteredApartments(filtered);
 	};
-
 	useEffect(() => {
 		getAllApartments();
+		console.log(apartments);
 	}, []);
-
 	return (
 		<div className="w3-container" style={{ paddingInline: 0 }}>
 			<div className="w3-hide-small">
@@ -97,20 +120,70 @@ function App() {
 
 			<div className="w3-container w3-right w3-col l10 m9 ">
 				<Header />
+				<div className="w3-container w3-col l11">
+					<Link
+						to={
+							useLocation().pathname === "/add-apartment"
+								? "/"
+								: "/add-apartment"
+						}
+					>
+						{useLocation().pathname === "/add-apartment" ? (
+							<button
+								className="w3-button w3-light-gray w3-center w3-mobile"
+								style={{
+									marginTop: "1rem",
+									fontWeight: 530,
+									fontFamily: "fantasy",
+								}}
+							>
+								<FontAwesomeIcon
+									style={{
+										marginRight: "0.6rem",
+										fontSize: "1.4rem",
+									}}
+									icon={faAngleLeft}
+								/>
+								Back to home
+							</button>
+						) : (
+							<button
+								className="w3-button w3-light-gray w3-center w3-mobile"
+								style={{
+									marginTop: "1rem",
+									fontWeight: 530,
+									fontFamily: "fantasy",
+								}}
+							>
+								<FontAwesomeIcon
+									style={{
+										marginRight: "0.6rem",
+										fontSize: "1.6rem",
+									}}
+									icon={faPlus}
+								/>
+								Add new apartment
+							</button>
+						)}
+					</Link>
+				</div>
+				<Routes>
+					<Route
+						path="/add-apartment"
+						element={<AddApartmentForm addApartment={addApartment} />}
+					/>
+					<Route
+						path="/"
+						element={
+							<ApartmentList
+								filteredApartments={filteredApartments}
+								toggleSideBar={toggleSideBar}
+								openModal={openModal}
+							/>
+						}
+					/>
+				</Routes>
 
-				<button
-					className="w3-button w3-light-gray w3-right w3-hide-large w3-hide-medium"
-					style={{
-						marginBottom: "0rem",
-						marginTop: "2rem",
-						fontWeight: 530,
-						fontFamily: "fantasy",
-					}}
-					onClick={toggleSideBar}
-				>
-					<FontAwesomeIcon style={{ marginRight: "0.6rem" }} icon={faFilter} />
-					{sideBarOpen ? "Hide filters" : "Show filters"}
-				</button>
 				{sideBarOpen && (
 					<div className="w3-container w3-hide-large w3-hide-medium">
 						<SideBar
@@ -128,24 +201,6 @@ function App() {
 						/>
 					</div>
 				)}
-				<div className="w3-container">
-					{filteredApartments.length > 0 ? (
-						filteredApartments.map((apartment) => (
-							<Apartment
-								key={apartment.id}
-								openModal={openModal}
-								apartment={apartment}
-							/>
-						))
-					) : (
-						<div
-							className=" w3-container w3-center"
-							style={{ marginTop: "3rem" }}
-						>
-							<p>No results found.</p>
-						</div>
-					)}
-				</div>
 			</div>
 		</div>
 	);

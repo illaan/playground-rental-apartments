@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import "./../styles/SideBar.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
