@@ -9,6 +9,9 @@ Rental is a web application designed to simplify the process of finding and rent
   - View apartment images, pricing, capacity, and descriptions.
   - Filter listings by location, price range, check-in and check-out dates, and the number of guests.
 
+**Screenshots**
+![Screenshot of my app](.src/assets/screenhots/rental.png "Screenshot of My App")
+
 ## Installation
 
 ### Prerequisites
